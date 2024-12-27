@@ -8,6 +8,8 @@
 	  <PackageId>PhoenixTools.$(AssemblyName)</PackageId>
 	  <Title>PhoenixTools.$(AssemblyName)</Title>
     <Description>Network-distributed stream with grpc connection. Server side.</Description>
+    <Version>1.0.2</Version>
+    <PackageReleaseNotes>Add ssl sertificate support</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
