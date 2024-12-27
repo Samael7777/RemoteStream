@@ -19,6 +19,9 @@ mono_crash.*
 # Test app
 [Tt]est/
 
+#Packages output
+NuGetPackages/
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/

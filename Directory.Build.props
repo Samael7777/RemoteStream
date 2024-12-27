@@ -1,0 +1,19 @@
+<Project>
+	<PropertyGroup>
+		<!-- Общие метаданные для NuGet -->
+		<Authors>Vadim Kutin</Authors>
+		<Company>Vadim Kutin</Company>
+		<Copyright>Copyright 2024 Vadim Kutin</Copyright>
+		<PackageProjectUrl>https://github.com/Samael7777/RemoteStream</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/Samael7777/RemoteStream</RepositoryUrl>
+		<PackageTags>remote stream; stream; grpc</PackageTags>
+		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+		<!-- <PackageReadmeFile>README.md</PackageReadmeFile> -->
+		<!-- <PackageLicenseFile>LICENSE.txt</PackageLicenseFile> -->
+		<Description>Network-distributed stream with grpc connection</Description>
+		<RepositoryType>git</RepositoryType>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+
+		<PackageOutputPath>$(SolutionDir)NuGetPackages</PackageOutputPath>
+	</PropertyGroup>
+</Project>
