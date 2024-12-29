@@ -9,8 +9,6 @@ namespace RemoteStream.Client;
 
 public class RemoteStreamClient : Stream
 {
-    private const string RpcConnectionUriScheme = "http";
-
     private readonly RemoteStreamRpcService.RemoteStreamRpcServiceClient _client;
     
     public override bool CanRead { get; }
@@ -24,11 +22,13 @@ public class RemoteStreamClient : Stream
         set => _client.SetPosition(new PositionRequest { Value = value });
     }
 
-    public RemoteStreamClient(IPEndPoint serverEndPoint)
+    public RemoteStreamClient(IPEndPoint serverEndPoint, bool useHttps = true)
     {
-        _client = BuildGrpcClient(serverEndPoint);
+        var serverUri = useHttps ? serverEndPoint.ToHttpsUri() : serverEndPoint.ToHttpUri();
         
+        _client = BuildGrpcClient(serverUri);
         var streamInfo = _client.GetStreamInfo(new Empty());
+
         CanTimeout = streamInfo.CanTimeout;
         CanRead = streamInfo.CanRead;
         CanSeek = streamInfo.CanSeek;
@@ -94,15 +94,14 @@ public class RemoteStreamClient : Stream
         ErrorHelper.CheckResultThrowError(result);
     }
     
-    private static RemoteStreamRpcService.RemoteStreamRpcServiceClient BuildGrpcClient(IPEndPoint serverEndPoint)
+    private static RemoteStreamRpcService.RemoteStreamRpcServiceClient BuildGrpcClient(Uri serverUri)
     {
         var httpClientHandler = new HttpClientHandler
         {
             ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator // заглушка для самоподписанного сертификата
         };
         var httpClient = new HttpClient(httpClientHandler);
-        var serverUriBuilder = new UriBuilder(RpcConnectionUriScheme, serverEndPoint.Address.ToString(), serverEndPoint.Port);
-        var channel = GrpcChannel.ForAddress(serverUriBuilder.Uri, new GrpcChannelOptions { HttpClient = httpClient });
+        var channel = GrpcChannel.ForAddress(serverUri, new GrpcChannelOptions { HttpClient = httpClient });
         
         return new RemoteStreamRpcService.RemoteStreamRpcServiceClient(channel);
     }
