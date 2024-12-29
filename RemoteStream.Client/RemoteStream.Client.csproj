@@ -8,6 +8,8 @@
     <Description>Network-distributed stream with grpc connection. Client side.</Description>
     <PackageId>PhoenixTools.$(AssemblyName)</PackageId>
 	<Title>PhoenixTools.$(AssemblyName)</Title>
+	<Version>1.0.1</Version>
+	<PackageReleaseNotes>Add https connection support</PackageReleaseNotes>
     
   </PropertyGroup>
 
