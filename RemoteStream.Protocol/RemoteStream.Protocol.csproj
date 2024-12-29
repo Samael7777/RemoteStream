@@ -7,7 +7,7 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 	  <PackageId>PhoenixTools.$(AssemblyName)</PackageId>
 	  <Title>PhoenixTools.$(AssemblyName)</Title>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
 	<Description>Base classes for PhoenixTools.RemoteStream</Description>
   </PropertyGroup>
 
