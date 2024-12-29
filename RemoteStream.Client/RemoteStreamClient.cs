@@ -21,10 +21,12 @@ public class RemoteStreamClient : Stream
         get => _client.GetPosition(new Empty()).Value;
         set => _client.SetPosition(new PositionRequest { Value = value });
     }
+    public IPEndPoint ServerEndPoint { get; }
 
-    public RemoteStreamClient(IPEndPoint serverEndPoint, bool useHttps)
+    public RemoteStreamClient(IPEndPoint serverEndPoint, ConnectionType connectionType)
     {
-        var serverUri = useHttps ? serverEndPoint.ToHttpsUri() : serverEndPoint.ToHttpUri();
+        ServerEndPoint = serverEndPoint;
+        var serverUri = BuildServerUri(connectionType);
         
         _client = BuildGrpcClient(serverUri);
         var streamInfo = _client.GetStreamInfo(new Empty());
@@ -33,6 +35,16 @@ public class RemoteStreamClient : Stream
         CanRead = streamInfo.CanRead;
         CanSeek = streamInfo.CanSeek;
         CanWrite = streamInfo.CanWrite;
+    }
+
+    private Uri BuildServerUri(ConnectionType connectionType)
+    {
+        return connectionType switch
+        {
+            ConnectionType.Http => ServerEndPoint.ToHttpUri(),
+            ConnectionType.Https => ServerEndPoint.ToHttpsUri(),
+            _ => throw new ArgumentOutOfRangeException(nameof(connectionType), connectionType, null)
+        };
     }
 
     public override void Flush()

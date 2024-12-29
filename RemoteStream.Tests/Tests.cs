@@ -64,7 +64,7 @@ public class Tests
     public void TestWithHttpsConnection()
     {
         using var streamServer = new RemoteStreamServer(_srcStream, _serverEp, _cert, _key);
-        using var streamClient = new RemoteStreamClient(_serverEp);
+        using var streamClient = new RemoteStreamClient(_serverEp, true);
 
         streamClient.CopyTo(_dstStream);
         Assert.That(IsBuffersSame, Is.True);
