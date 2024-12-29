@@ -25,7 +25,7 @@ serverStream.ExceptionThrew += (_, exception) =>
     //Exception handling...
 };
 
-serverStream.StreamClosed += , ) =>
+serverStream.StreamClosed += (_, _) =>
 {
     //Stream close event handling...
 };
