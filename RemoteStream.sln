@@ -19,6 +19,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "???????? ???????", "???????
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RemoteStream.Tests", "RemoteStream.Tests\RemoteStream.Tests.csproj", "{2E621229-C672-4CD1-9107-7B6F4A482F5C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,6 +43,10 @@ Global
 		{DD992EB9-02BE-4966-AABB-AC702D81AA76}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DD992EB9-02BE-4966-AABB-AC702D81AA76}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DD992EB9-02BE-4966-AABB-AC702D81AA76}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2E621229-C672-4CD1-9107-7B6F4A482F5C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E621229-C672-4CD1-9107-7B6F4A482F5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E621229-C672-4CD1-9107-7B6F4A482F5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E621229-C672-4CD1-9107-7B6F4A482F5C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
