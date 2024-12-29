@@ -9,16 +9,20 @@ namespace RemoteStream.Client;
 
 public class RemoteStreamClient : Stream
 {
+    private const int GrpcMaxReceiveMessageSize = 4 * 1024 * 1024; //4 Mb
+    private const int MaxWriteBufferSize = GrpcMaxReceiveMessageSize - 5; //Max gRpc message size - header size
+
+    private readonly Empty _emptyRequest = new();
     private readonly RemoteStreamRpcService.RemoteStreamRpcServiceClient _client;
     
     public override bool CanRead { get; }
     public override bool CanSeek { get; }
     public override bool CanWrite { get; }
     public override bool CanTimeout { get; }
-    public override long Length => _client.GetLength(new Empty()).Value;
+    public override long Length => _client.GetLength(_emptyRequest).Value;
     public override long Position
     {
-        get => _client.GetPosition(new Empty()).Value;
+        get => _client.GetPosition(_emptyRequest).Value;
         set => _client.SetPosition(new PositionRequest { Value = value });
     }
     public IPEndPoint ServerEndPoint { get; }
@@ -29,7 +33,7 @@ public class RemoteStreamClient : Stream
         var serverUri = BuildServerUri(connectionType);
         
         _client = BuildGrpcClient(serverUri);
-        var streamInfo = _client.GetStreamInfo(new Empty());
+        var streamInfo = _client.GetStreamInfo(_emptyRequest);
 
         CanTimeout = streamInfo.CanTimeout;
         CanRead = streamInfo.CanRead;
@@ -49,13 +53,13 @@ public class RemoteStreamClient : Stream
 
     public override void Flush()
     {
-        var result = _client.Flush(new Empty());
+        var result = _client.Flush(_emptyRequest);
         ErrorHelper.CheckResultThrowError(result);
     }
 
     public override async Task FlushAsync(CancellationToken ct)
     {
-        var result = await _client.FlushAsync(new Empty(), cancellationToken: ct)
+        var result = await _client.FlushAsync(_emptyRequest, cancellationToken: ct)
             .ConfigureAwait(false);
         ErrorHelper.CheckResultThrowError(result);
     }
@@ -100,20 +104,79 @@ public class RemoteStreamClient : Stream
 
     public override async ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken ct = new())
     {
-        var options = new CallOptions(cancellationToken: ct);
-        var request = new WriteRequest { Data = ByteString.CopyFrom(buffer.Span) };
-        var result = await _client.WriteAsync(request, options).ConfigureAwait(false);
-        ErrorHelper.CheckResultThrowError(result);
+        if (buffer.IsEmpty) return;
+        var options = new CallOptions().WithCancellationToken(ct);
+        
+        var offset = 0;
+
+        while (offset < buffer.Length)
+        {
+            var left = buffer.Length - offset;
+            var blockSize = Math.Min(left, MaxWriteBufferSize);
+
+            var request = new WriteRequest { Data = ByteString.CopyFrom(buffer.Span.Slice(offset, blockSize)) };
+            var result = await _client.WriteAsync(request, options).ConfigureAwait(false);
+            ErrorHelper.CheckResultThrowError(result);
+
+            offset += blockSize;
+        }
     }
+
+    #region Not implemented
+    /// <summary>
+    /// Not implemented
+    /// </summary>
+    /// <exception cref="NotImplementedException"></exception>
+    public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback? callback, object? state)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// Not implemented
+    /// </summary>
+    /// <exception cref="NotImplementedException"></exception>
+    public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback? callback, object? state)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// Not implemented
+    /// </summary>
+    /// <exception cref="NotImplementedException"></exception>
+    public override int EndRead(IAsyncResult asyncResult)
+    { 
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// Not implemented
+    /// </summary>
+    /// <exception cref="NotImplementedException"></exception>
+    public override void EndWrite(IAsyncResult asyncResult)
+    {
+        throw new NotImplementedException();
+    }
+    
+    #endregion
     
     private static RemoteStreamRpcService.RemoteStreamRpcServiceClient BuildGrpcClient(Uri serverUri)
     {
         var httpClientHandler = new HttpClientHandler
         {
-            ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator // заглушка для самоподписанного сертификата
+            // заглушка для самоподписанного сертификата
+            ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator 
         };
+
         var httpClient = new HttpClient(httpClientHandler);
-        var channel = GrpcChannel.ForAddress(serverUri, new GrpcChannelOptions { HttpClient = httpClient });
+        var options = new GrpcChannelOptions
+        {
+            HttpClient = httpClient,
+            MaxReceiveMessageSize = GrpcMaxReceiveMessageSize
+        };
+
+        var channel = GrpcChannel.ForAddress(serverUri, options);
         
         return new RemoteStreamRpcService.RemoteStreamRpcServiceClient(channel);
     }
