@@ -22,7 +22,7 @@ public class RemoteStreamClient : Stream
         set => _client.SetPosition(new PositionRequest { Value = value });
     }
 
-    public RemoteStreamClient(IPEndPoint serverEndPoint, bool useHttps = true)
+    public RemoteStreamClient(IPEndPoint serverEndPoint, bool useHttps)
     {
         var serverUri = useHttps ? serverEndPoint.ToHttpsUri() : serverEndPoint.ToHttpUri();
         
