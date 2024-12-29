@@ -51,30 +51,54 @@ public class Tests
     }
 
     [Test]
-    public void TestWithHttpConnection()
+    public void TestReadWithHttpConnection()
     {
         using var streamServer = new RemoteStreamServer(_srcStream, _serverEp);
-        using var streamClient = new RemoteStreamClient(_serverEp, false);
+        using var streamClient = new RemoteStreamClient(_serverEp, ConnectionType.Http);
 
         streamClient.CopyTo(_dstStream);
         Assert.That(IsBuffersSame, Is.True);
     }
 
     [Test]
-    public void TestWithHttpsConnection()
+    public void TestReadWithHttpsConnection()
     {
         using var streamServer = new RemoteStreamServer(_srcStream, _serverEp, _cert, _key);
-        using var streamClient = new RemoteStreamClient(_serverEp, true);
+        using var streamClient = new RemoteStreamClient(_serverEp, ConnectionType.Https);
 
         streamClient.CopyTo(_dstStream);
+        Assert.That(IsBuffersSame, Is.True);
+    }
+    
+    [Test]
+    public void TestWriteWithHttpConnection()
+    {
+        using var streamServer = new RemoteStreamServer(_dstStream, _serverEp);
+        using var streamClient = new RemoteStreamClient(_serverEp, ConnectionType.Http);
+
+        _srcStream.CopyTo(streamClient);
+        Assert.That(IsBuffersSame, Is.True);
+    }
+
+    [Test]
+    public void TestWriteWithHttpsConnection()
+    {
+        using var streamServer = new RemoteStreamServer(_dstStream, _serverEp, _cert, _key);
+        using var streamClient = new RemoteStreamClient(_serverEp, ConnectionType.Https);
+
+        _srcStream.CopyTo(streamClient);
         Assert.That(IsBuffersSame, Is.True);
     }
 
     private bool IsBuffersSame()
     {
-        var srcMd5 = MD5.HashData(_srcBuffer);
-        var dstMd5 = MD5.HashData(_dstBuffer);
+        var srcMd5Task = Task.Run(() => MD5.HashData(_srcBuffer));
+        var dstMd5Task = Task.Run(() => MD5.HashData(_dstBuffer));
+        Task.WaitAll(srcMd5Task, dstMd5Task);
         
+        var srcMd5 = srcMd5Task.Result;
+        var dstMd5 = dstMd5Task.Result;
+
         return srcMd5.SequenceEqual(dstMd5);
     }
 }
