@@ -1,7 +1,7 @@
 ﻿using Google.Protobuf;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
-using RemoteStream.Protocol;
+using RemoteStream.Protocol.Proto_old;
 
 
 namespace RemoteStream.Server;
