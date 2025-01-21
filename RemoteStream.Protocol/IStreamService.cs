@@ -3,7 +3,7 @@
 namespace RemoteStream.Protocol;
 
 [ServiceContract]
-public interface IStream
+public interface IStreamService
 {
     [OperationContract] 
     Task<Response<StreamInfo>> GetStreamInfo();
